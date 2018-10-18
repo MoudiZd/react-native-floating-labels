@@ -1,7 +1,5 @@
 'use strict';
 import React, {Component} from 'react';
-import PropTypes from 'prop-types';
-import createReactClass from 'create-react-class';
 
 import {
   StyleSheet,
@@ -14,8 +12,8 @@ import {
   Platform,
   ViewPropTypes
 } from 'react-native';
-
-var textPropTypes = Text.propTypes || ViewPropTypes
+import PropTypes from 'prop-types';
+var textPropTypes = Text.propTypes || View.propTypes
 var textInputPropTypes = TextInput.propTypes || textPropTypes
 var propTypes = {
   ...textInputPropTypes,
@@ -25,30 +23,32 @@ var propTypes = {
   style: ViewPropTypes.style,
 }
 
-var FloatingLabel  = createReactClass({
-  propTypes: propTypes,
+export default class FloatingLabel extends Component{
+  static propTypes = propTypes;
 
-  getInitialState () {
-    var state = {
-      text: this.props.value,
-      dirty: (this.props.value || this.props.placeholder)
+  constructor (props)
+    {
+      super(props);
+      this.state =
+        {
+          text: props.value,
+          dirty: (props.value || props.placeholder)
+        };
+
+      this.style = this.state.dirty ? dirtyStyle : cleanStyle
+      this.state.labelStyle =
+        {
+          fontSize: new Animated.Value(this.style.fontSize),
+          top: new Animated.Value(this.style.top)
+        }
     };
-
-    var style = state.dirty ? dirtyStyle : cleanStyle
-    state.labelStyle = {
-      fontSize: new Animated.Value(style.fontSize),
-      top: new Animated.Value(style.top)
-    }
-
-    return state
-  },
 
   componentWillReceiveProps (props) {
     if (typeof props.value !== 'undefined' && props.value !== this.state.text) {
       this.setState({ text: props.value, dirty: !!props.value })
       this._animate(!!props.value)
     }
-  },
+  };
 
   _animate(dirty) {
     var nextStyle = dirty ? dirtyStyle : cleanStyle
@@ -65,7 +65,7 @@ var FloatingLabel  = createReactClass({
     })
 
     Animated.parallel(anims).start()
-  },
+  };
 
   _onFocus () {
     this._animate(true)
@@ -73,7 +73,7 @@ var FloatingLabel  = createReactClass({
     if (this.props.onFocus) {
       this.props.onFocus(arguments);
     }
-  },
+  };
 
   _onBlur () {
     if (!this.state.text) {
@@ -84,14 +84,14 @@ var FloatingLabel  = createReactClass({
     if (this.props.onBlur) {
       this.props.onBlur(arguments);
     }
-  },
+  };
 
   onChangeText(text) {
     this.setState({ text })
     if (this.props.onChangeText) {
       this.props.onChangeText(text)
     }
-  },
+  };
 
   updateText(event) {
     var text = event.nativeEvent.text
@@ -100,7 +100,7 @@ var FloatingLabel  = createReactClass({
     if (this.props.onEndEditing) {
       this.props.onEndEditing(event)
     }
-  },
+  };
 
   _renderLabel () {
     return (
@@ -111,7 +111,7 @@ var FloatingLabel  = createReactClass({
         {this.props.children}
       </Animated.Text>
     )
-  },
+  };
 
   render() {
     var props = {
@@ -164,8 +164,8 @@ var FloatingLabel  = createReactClass({
         </TextInput>
       </View>
     );
-  },
-});
+  }
+};
 
 var labelStyleObj = {
   marginTop: 21,
@@ -206,5 +206,4 @@ var dirtyStyle = {
   fontSize: 12,
   top: -17,
 }
-
 module.exports = FloatingLabel;
